@@ -1,0 +1,10 @@
+[settings]
+host=chat.freenode.net
+port=8000
+nick=your_name
+password=your_password
+conn_password=random_connection_password
+username=your_username
+realname=your_real_name
+channel=#some_channel
+github_token=github_api_token_with_public_repo_access
