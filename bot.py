@@ -1,10 +1,8 @@
 import configparser
 import logging
-import time
-import re
+import trio
+
 from irc import Irc
-from urlre import URL_REGEX
-from parser import parse_url
 
 logging.basicConfig(filename="log", level=logging.DEBUG)
 # logging.basicConfig(level=logging.DEBUG)
@@ -28,25 +26,17 @@ c = Irc(
     config.get("username"),
     config.get("realname"),
     config.get("channel"),
+    config.get("github_token"),
 )
 
-c.connect()
 
-while True:
-    time.sleep(0.1)
-    try:
-        data = c.recv()
-        if data:
-            # log.debug(data)
-            urls = re.findall(URL_REGEX, data)
-            if urls:
-                for url in urls:
-                    res = parse_url(url, config.get("github_token"))
-                    if res:
-                        c.send("PRIVMSG", f'{config.get("channel")} {res}')
-    except OSError as e:
-        log.exception(e)
-        log.warning("Trying to reconnect")
-        c.reconnect()
-    except Exception as e:
-        log.exception(e)
+async def main():
+    await c.connect()
+    async with trio.open_nursery() as nursery:
+        log.debug("parent: spawning sender...")
+        nursery.start_soon(c.sender)
+
+        log.debug("parent: spawning receiver...")
+        nursery.start_soon(c.receiver)
+
+trio.run(main)
