@@ -12,8 +12,16 @@ log.setLevel(logging.DEBUG)
 
 class Irc:
     def __init__(
-            self, host, port, nick, password, conn_password, user_name, real_name,
-            channel, github_token
+        self,
+        host,
+        port,
+        nick,
+        password,
+        conn_password,
+        user_name,
+        real_name,
+        channel,
+        github_token,
     ):
         self.host = host
         self.port = port
@@ -60,7 +68,7 @@ class Irc:
     async def receiver(self):
         log.debug("receiver: started!")
         async for msg in self.stream:
-            msg = msg.decode('utf-8')
+            msg = msg.decode("utf-8")
             log.debug(f"received:\n{msg}")
             if msg[0:4] == "PING":
                 await self.send("PONG", msg.split()[1])
@@ -70,5 +78,5 @@ class Irc:
                     for url in urls:
                         res = parse_url(url, self.github_token)
                         if res:
-                            await self.send("PRIVMSG", f'{self.channel} {res}')
+                            await self.send("PRIVMSG", f"{self.channel} {res}")
         log.error("receiver: connection closed")
